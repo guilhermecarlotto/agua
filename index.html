@@ -160,8 +160,8 @@
   /* ---- Quick add buttons ---- */
   .btn-grid{
     display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap:10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap:8px;
     margin-bottom:12px;
   }
   .btn-add{
@@ -178,10 +178,57 @@
     box-shadow: 0 6px 14px rgba(20,120,200,0.35);
   }
   .btn-add:active{ transform: scale(0.94); filter:brightness(1.15); }
+  .btn-bottle{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+  }
+  .btn-bottle .bottle-icon{ width:20px; height:38px; display:block; }
   .manual-row{
     display:flex;
     gap:8px;
   }
+  .past-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .past-row input[type="date"]{
+    flex:1;
+    min-width:150px;
+    background:var(--bg-1);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 14px;
+    font-size:14px;
+    font-weight:600;
+    color-scheme: dark;
+  }
+  .past-row input[type="number"]{
+    flex:1;
+    min-width:120px;
+    background:var(--bg-1);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:14px;
+    padding:12px 14px;
+    font-size:15px;
+    font-weight:600;
+  }
+  .past-row button{
+    background: var(--card);
+    border: 1px solid var(--accent);
+    color: var(--accent-2);
+    border-radius:14px;
+    padding: 0 18px;
+    font-weight:800;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .past-row button:active{ transform: scale(0.95); }
   .manual-row input{
     flex:1;
     background:var(--bg-1);
@@ -443,12 +490,36 @@
       <div class="btn-add" data-amt="250">+250ml</div>
       <div class="btn-add" data-amt="500">+500ml</div>
       <div class="btn-add" data-amt="1000">+1L</div>
+      <div class="btn-add btn-bottle" data-amt="1700">
+        <svg class="bottle-icon" viewBox="0 0 24 48" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bottleGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8fe3ff"/>
+              <stop offset="100%" stop-color="#1478c8"/>
+            </linearGradient>
+          </defs>
+          <rect x="9" y="1" width="6" height="5" rx="1.5" fill="#3ddc97" stroke="#2a5478" stroke-width="0.6"/>
+          <rect x="8" y="6" width="8" height="4" fill="#0c2136" stroke="#2a5478" stroke-width="0.6"/>
+          <path d="M6 10 H18 V38 A5 5 0 0 1 13 43 H11 A5 5 0 0 1 6 38 Z" fill="url(#bottleGrad)" stroke="#2a5478" stroke-width="1"/>
+        </svg>
+        <div>1,7L</div>
+      </div>
     </div>
     <div class="manual-row">
       <input type="number" id="manualInput" placeholder="Quantidade manual (ml)" min="1">
       <button id="manualAdd">Adicionar</button>
     </div>
     <div class="undo-row"><button id="undoBtn">↩ desfazer último registro</button></div>
+  </div>
+
+  <!-- ADD TO PAST DAY -->
+  <div class="card">
+    <h2>Adicionar em dia anterior</h2>
+    <div class="past-row">
+      <input type="date" id="pastDateInput">
+      <input type="number" id="pastAmountInput" placeholder="Quantidade (ml)" min="1">
+      <button id="pastAddBtn">Adicionar</button>
+    </div>
   </div>
 
   <!-- TOGGLES -->
@@ -708,6 +779,18 @@
     }
   }
 
+  function addWaterToDate(key, amt){
+    if(!amt || amt <= 0) return;
+    if(!key){ showToast("escolha uma data"); return; }
+    if(key > todayKey()){ showToast("não é possível lançar em data futura"); return; }
+    var day = ensureDay(key);
+    day.entries.push({ amt: Math.round(amt), time: "--:--", wake: false });
+    render();
+    var dt = new Date(key+"T00:00:00");
+    var label = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+    showToast("+" + Math.round(amt) + "ml adicionados em " + label + " 💧");
+  }
+
   function undoLast(){
     var key = todayKey();
     var day = ensureDay(key);
@@ -923,6 +1006,16 @@
     if(e.key === "Enter"){ document.getElementById("manualAdd").click(); }
   });
   document.getElementById("undoBtn").addEventListener("click", undoLast);
+  var pastDateInput = document.getElementById("pastDateInput");
+  var pastAmountInput = document.getElementById("pastAmountInput");
+  pastDateInput.max = todayKey();
+  document.getElementById("pastAddBtn").addEventListener("click", function(){
+    var v = parseInt(pastAmountInput.value, 10);
+    if(v > 0){
+      addWaterToDate(pastDateInput.value, v);
+      pastAmountInput.value = "";
+    }
+  });
   goalInput.addEventListener("change", function(){ setGoal(goalInput.value); });
   wakeToggle.addEventListener("click", toggleWakeMode);
   vitToggle.addEventListener("click", toggleVitamins);
