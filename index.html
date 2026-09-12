@@ -1051,6 +1051,14 @@
     window.addEventListener("load", function(){
       navigator.serviceWorker.register("sw.js").catch(function(){});
     });
+    // Quando um novo service worker assume o controle (nova versão publicada
+    // no GitHub), recarrega a página automaticamente para exibir o conteúdo novo.
+    var refreshingSW = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function(){
+      if (refreshingSW) return;
+      refreshingSW = true;
+      window.location.reload();
+    });
   }
 
   /* ---------------- Init ---------------- */

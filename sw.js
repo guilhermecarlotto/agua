@@ -1,6 +1,8 @@
 // Service Worker - Gota (Controle de Água)
-// Estratégia: cache-first para os assets do app, funciona 100% offline.
-const CACHE_NAME = 'gota-agua-v1';
+// Estratégia: network-first. Sempre tenta buscar a versão mais nova quando
+// há internet (assim o app atualiza sozinho a cada novo deploy no GitHub);
+// só usa o cache como fallback quando o dispositivo está offline.
+const CACHE_NAME = 'gota-agua-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -30,15 +32,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => cached);
-    })
+    fetch(event.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
