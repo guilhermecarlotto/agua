@@ -90,15 +90,13 @@
   .btn-grid.three{ grid-template-columns:repeat(3,1fr); }
   .btn-add{
     background:linear-gradient(160deg,#1478c8,#0e5a9c); border:1px solid #1f6fae; color:#fff;
-    border-radius:16px; padding:16px 4px; font-size:15px; font-weight:800; text-align:center; cursor:pointer;
-    transition:transform .12s ease, filter .12s ease; box-shadow:0 6px 14px rgba(20,120,200,.35);
-    min-height:56px; display:flex; align-items:center; justify-content:center; user-select:none;
+    border-radius:999px; padding:6px 4px; font-size:14px; font-weight:800; text-align:center; cursor:pointer;
+    transition:transform .12s ease, filter .12s ease; box-shadow:0 3px 8px rgba(20,120,200,.3);
+    min-height:36px; display:flex; align-items:center; justify-content:center; user-select:none;
   }
   .btn-add:active, .btn-add.flash{ transform:scale(.94); filter:brightness(1.15); }
   .btn-add.coffee{ background:linear-gradient(160deg,#a8702f,#7a4e1e); border-color:#a8702f; box-shadow:0 6px 14px rgba(168,112,47,.3); }
   .btn-add.chima{ background:linear-gradient(160deg,#1f9b6a,#146b49); border-color:#27a577; box-shadow:0 6px 14px rgba(31,155,106,.3); }
-  .btn-bottle{ flex-direction:column; gap:4px; }
-  .btn-bottle .bottle-icon{ width:20px; height:38px; display:block; }
   .manual-row{ display:flex; gap:8px; }
   .inp{
     width:100%; background:var(--bg-1); border:1px solid var(--border); color:var(--text);
@@ -131,7 +129,8 @@
   .opts-row .linkbtn{ padding:6px 4px; min-height:36px; white-space:nowrap; }
   /* chimarrão por cuias */
   .cuia-row{ display:grid; grid-template-columns:1fr 1.25fr; gap:10px; align-items:end; }
-  .cuia-btn{ min-height:68px; font-size:19px; }
+  .cuia-row .inp{ height:46px; min-height:46px; }
+  .cuia-btn{ min-height:46px; height:46px; border-radius:14px; font-size:20px; padding:0 4px; }
   .cuia-counter{ margin-top:12px; background:var(--bg-1); border:1px solid var(--border); border-radius:14px; padding:12px 14px; }
   .cuia-big{ font-size:22px; font-weight:800; color:var(--chima); }
   .cuia-big small{ font-size:13px; color:var(--text-dim); font-weight:600; }
@@ -325,7 +324,7 @@
   body.oled table.cmp th, body.oled table.cmp td{ border-color:#2b100b; }
   body.oled .entry.wake{ border-color:#5a2418; }
   /* imagens, gráficos e emojis: tons de vermelho escuro */
-  body.oled canvas, body.oled .glass, body.oled .logo, body.oled .bottle-icon,
+  body.oled canvas, body.oled .glass, body.oled .logo,
   body.oled nav#bottomNav .e, body.oled .entry .ico, body.oled .toggle .emoji, body.oled .icon-btn,
   body.oled .mini-toggle, body.oled .chip{
     filter:sepia(1) hue-rotate(-50deg) saturate(2.2) brightness(.62);
@@ -391,15 +390,7 @@
         <div class="btn-add" data-water="250">+250ml</div>
         <div class="btn-add" data-water="500">+500ml</div>
         <div class="btn-add" data-water="1000">+1L</div>
-        <div class="btn-add btn-bottle" data-water="1700">
-          <svg class="bottle-icon" viewBox="0 0 24 48" xmlns="http://www.w3.org/2000/svg">
-            <defs><linearGradient id="bottleGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8fe3ff"/><stop offset="100%" stop-color="#1478c8"/></linearGradient></defs>
-            <rect x="9" y="1" width="6" height="5" rx="1.5" fill="#3ddc97" stroke="#2a5478" stroke-width="0.6"/>
-            <rect x="8" y="6" width="8" height="4" fill="#0c2136" stroke="#2a5478" stroke-width="0.6"/>
-            <path d="M6 10 H18 V38 A5 5 0 0 1 13 43 H11 A5 5 0 0 1 6 38 Z" fill="url(#bottleGrad)" stroke="#2a5478" stroke-width="1"/>
-          </svg>
-          <div>1,7L</div>
-        </div>
+        <div class="btn-add" data-water="1700">+1,7L</div>
       </div>
       <div class="manual-row">
         <input type="number" class="inp" id="manualInput" placeholder="Quantidade manual (ml)" min="1" inputmode="numeric">
@@ -420,7 +411,7 @@
           <label for="cuiaMl">Tamanho da cuia (ml)</label>
           <input type="number" class="inp" id="cuiaMl" min="1" max="3000" inputmode="numeric" placeholder="ex.: 200">
         </div>
-        <button type="button" class="btn-add chima cuia-btn" id="cuiaBtn">🧉 + cuia</button>
+        <button type="button" class="btn-add chima cuia-btn" id="cuiaBtn" aria-label="Mais uma cuia" title="Mais uma cuia">+ 🧉</button>
       </div>
       <div class="cuia-counter" id="cuiaCounter"></div>
     </div>
