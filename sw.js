@@ -4,9 +4,9 @@
 //
 // IMPORTANTE: o Service Worker só guarda os ARQUIVOS DO APP (HTML/JS/ícones).
 // Os dados pessoais ficam em localStorage/IndexedDB, que este arquivo nunca toca.
-// Ao subir uma versão nova, troque CACHE_NAME (ex.: gota-v5) para forçar a renovação do cache.
+// Ao subir uma versão nova, troque CACHE_NAME (ex.: gota-v6) para forçar a renovação do cache.
 const CACHE_PREFIX = 'gota-';
-const CACHE_NAME = 'gota-v4';
+const CACHE_NAME = 'gota-v5';
 const ASSETS = [
   './',
   './index.html',

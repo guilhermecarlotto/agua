@@ -14,7 +14,12 @@ Diário pessoal (PWA, HTML/CSS/JS puro, sem build, sem backend, sem dependência
 
 O botão 🚻 também fica **no cabeçalho de todas as telas**. Entre 22h e 6h o app reduz o brilho, desliga animações/confete e abre direto na aba Sono.
 
-**Modo noturno (tela mínima):** em ⚙️ Ajustes há uma chave que troca a paleta azul por fundo **preto puro (#000)** com textos, bordas, gráficos e ícones em vermelho escuro, sem animações — pensado para telas OLED (pixel preto = apagado) e para registrar a ida ao banheiro de madrugada com o mínimo de luz. A escolha fica salva no aparelho (não entra no backup). O seletor de hora/data nativo do iOS é desenhado pelo sistema e pode continuar claro.
+**Visual animado (desde a 2.2.0):** fundo com manchas de cor em movimento, cartões de vidro, esfera de água com ondas e anel de progresso, botões com brilho, gotinhas/emoji ao registrar, barra inferior flutuante com indicador deslizante e botão 🚻 flutuante (nas abas Água e Análise). Respeita "Reduzir movimento" do iOS.
+
+**Modo noturno (tela mínima):** troca a paleta colorida por fundo **preto puro (#000)** com textos, bordas, gráficos e ícones em vermelho escuro, sem animações — pensado para telas OLED (pixel preto = apagado) e para registrar a ida ao banheiro de madrugada com o mínimo de luz.
+- **Automático:** liga sozinho às **22h** e desliga às **6h**.
+- **Manual:** a chave em ⚙️ Ajustes liga/desliga a qualquer hora. A escolha manual vale até a próxima virada (22h ou 6h) e depois volta ao automático; "voltar ao automático agora" cancela antes.
+- O aviso de que o seletor de hora/data nativo do iOS é desenhado pelo sistema e pode continuar claro continua valendo. A preferência fica só no aparelho (não entra no backup).
 
 ## Como o registro foi mantido simples
 
@@ -54,7 +59,7 @@ O botão 🚻 também fica **no cabeçalho de todas as telas**. Entre 22h e 6h o
 agua/
 ├── index.html        app (interface, armazenamento, gráficos)
 ├── gota-core.js      NOVO — lógica pura: datas, migração, validação, cálculos, análises (testável sem navegador)
-├── sw.js             service worker (network-first; cache gota-v4)
+├── sw.js             service worker (network-first; cache gota-v5)
 ├── manifest.json     manifesto PWA
 ├── icon-192.png / icon-512.png
 ├── tests/
@@ -74,7 +79,7 @@ agua/
 ## Atualizar no iPhone
 
 1. Abra o app instalado **com internet**. O Service Worker busca a versão nova e o app recarrega sozinho (se não, feche o app deslizando e abra de novo).
-2. Confira em ⚙️ Ajustes: versão 2.0.0 e a mensagem "Histórico do Gota antigo migrado".
+2. Confira em ⚙️ Ajustes: versão 2.2.0 e a mensagem "Histórico do Gota antigo migrado".
 3. Se parecer que não atualizou, feche o app e abra de novo com internet. **Nunca** apague os dados do site/app no iPhone sem ter um backup exportado.
 4. Faça um backup novo depois de conferir os dados.
 
