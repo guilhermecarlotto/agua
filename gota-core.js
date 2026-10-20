@@ -14,6 +14,7 @@
   var MIN_GROUP = 3;      // mínimo de noites por grupo para gerar observação
   var MIN_TOTAL = 8;      // mínimo de noites comparáveis no total
   var MAX_DRINK_ML = 10000;
+  var SESSION_GAP_MIN = 180; // sem nova cuia por 3 h => a próxima cuia abre outra sessão
   var BATH_TOLERANCE = 10; // minutos de tolerância para sugerir despertar ↔ banheiro
 
   var TYPES = {
@@ -75,7 +76,7 @@
   }
 
   function defaultSettings() {
-    return { goalMl: 2000, recordStreak: 0, quickCoffee: [50, 100, 200], quickChima: [250, 500, 1000] };
+    return { goalMl: 2000, recordStreak: 0, quickCoffee: [50, 100, 200], quickChima: [250, 500, 1000], cuiaMl: null };
   }
 
   function createEmptyState(nowIso) {
@@ -171,6 +172,11 @@
       createdAt: d.createdAt || null, updatedAt: d.updatedAt || null
     };
     if (d.wake) out.wake = true;
+    if (type === 'chimarrao' && Math.round(+d.cuias) > 0) {
+      out.cuias = Math.round(+d.cuias);
+      var cm = Math.round(+d.cuiaMl); if (cm > 0) out.cuiaMl = cm;
+      if (d.closed) out.closed = true;
+    }
     if (d.source) out.source = String(d.source).slice(0, 20);
     if (isTime(d.start) && isTime(d.end) && out.time) { out.start = d.start; out.end = d.end; out.time = d.end; }
     return out;
@@ -238,6 +244,8 @@
       if (goal > 0) st.settings.goalMl = goal;
       var rec = Math.round(+rs.recordStreak);
       if (rec > 0) st.settings.recordStreak = rec;
+      var cuia = Math.round(+rs.cuiaMl);
+      if (cuia > 0 && cuia <= 3000) st.settings.cuiaMl = cuia;
       st.settings.quickCoffee = cleanQuick(rs.quickCoffee, st.settings.quickCoffee);
       st.settings.quickChima = cleanQuick(rs.quickChima, st.settings.quickChima);
       var count = function (arr, fn) {
@@ -284,6 +292,7 @@
     });
     Object.keys(inc.vitamins).forEach(function (k) { if (!cur.vitamins[k]) { cur.vitamins[k] = true; added.vitamins++; } });
     cur.settings.recordStreak = Math.max(cur.settings.recordStreak || 0, inc.settings.recordStreak || 0);
+    if (!cur.settings.cuiaMl && inc.settings.cuiaMl) cur.settings.cuiaMl = inc.settings.cuiaMl;
     if (!cur.legacy && inc.legacy) cur.legacy = inc.legacy;
     return added;
   }
@@ -359,6 +368,7 @@
     if (merged.start && merged.end) { d.start = merged.start; d.end = merged.end; d.time = merged.end; }
     else { delete d.start; delete d.end; }
     if (d.type !== 'water') delete d.wake;
+    if (d.type !== 'chimarrao') { delete d.cuias; delete d.cuiaMl; delete d.closed; }
     d.updatedAt = (opts && opts.nowIso) || new Date().toISOString();
     return { ok: true, item: d };
   }
@@ -444,6 +454,64 @@
       if (run > record) record = run;
     });
     return { current: cur, record: record };
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Chimarrão por cuias: a 1ª cuia marca o início da sessão, a última o fim */
+  /* ------------------------------------------------------------------ */
+  /** Sessão em andamento: registro de chimarrão com cuias, não encerrado, cuja última cuia foi há ≤ 3 h. */
+  function activeCuiaSession(state, nowAbsMin) {
+    var best = null;
+    state.drinks.forEach(function (d) {
+      if (d.type !== 'chimarrao' || !(d.cuias > 0) || d.closed) return;
+      var iv = drinkInterval(d);
+      if (!iv) return;
+      var gap = nowAbsMin - iv.e;
+      if (gap < -1 || gap > SESSION_GAP_MIN) return;
+      if (!best || iv.e > best.e) best = { d: d, e: iv.e };
+    });
+    return best ? best.d : null;
+  }
+
+  /** Soma uma cuia. Cria a sessão na primeira; nas seguintes atualiza o MESMO registro (volume e fim). */
+  function addCuia(state, p, opts) {
+    var ml = Math.round(+p.cuiaMl);
+    if (!(ml > 0)) return { ok: false, error: 'Informe o tamanho da cuia em ml.' };
+    if (ml > 3000) return { ok: false, error: 'Tamanho da cuia acima de 3000 ml.' };
+    if (!isDate(p.date) || !isTime(p.time)) return { ok: false, error: 'Data ou horário inválido.' };
+    var nowIso = (opts && opts.nowIso) || new Date().toISOString();
+    var s = activeCuiaSession(state, toAbs(p.date, p.time));
+    if (s) {
+      var startT = s.start || s.time;
+      var dur = (hm2min(p.time) - hm2min(startT) + 1440) % 1440;
+      if (dur <= 16 * 60 && s.ml + ml <= MAX_DRINK_ML) {
+        s.ml += ml; s.cuias += 1; s.cuiaMl = ml; s.updatedAt = nowIso;
+        if (p.time !== startT) { s.start = startT; s.end = p.time; s.time = p.time; }
+        return { ok: true, item: s, created: false };
+      }
+    }
+    var r = addDrink(state, { type: 'chimarrao', ml: ml, date: p.date, time: p.time }, opts);
+    if (!r.ok) return r;
+    r.item.cuias = 1; r.item.cuiaMl = ml;
+    return { ok: true, item: r.item, created: true };
+  }
+
+  function closeCuiaSession(state, id) {
+    var d = state.drinks.filter(function (x) { return x.id === id; })[0];
+    if (!d) return false;
+    d.closed = true; d.updatedAt = new Date().toISOString();
+    return true;
+  }
+
+  /** Contador: sessão em andamento e totais de cuias do dia. */
+  function cuiaStats(state, date, time) {
+    var act = activeCuiaSession(state, toAbs(date, time));
+    var dayCuias = 0, dayMl = 0;
+    state.drinks.forEach(function (d) {
+      if (d.date !== date || d.type !== 'chimarrao') return;
+      dayMl += d.ml; if (d.cuias > 0) dayCuias += d.cuias;
+    });
+    return { active: act, cuias: act ? act.cuias : 0, ml: act ? act.ml : 0, dayCuias: dayCuias, dayChimaMl: dayMl };
   }
 
   /* ------------------------------------------------------------------ */
@@ -837,6 +905,7 @@
     isV1: isV1, migrateV1: migrateV1, normalizeState: normalizeState, mergeStates: mergeStates,
     groupOf: groupOf, drinkInterval: drinkInterval, validateDrinkInput: validateDrinkInput,
     addDrink: addDrink, updateDrink: updateDrink, deleteById: deleteById,
+    addCuia: addCuia, activeCuiaSession: activeCuiaSession, closeCuiaSession: closeCuiaSession, cuiaStats: cuiaStats,
     indexDrinks: indexDrinks, drinksAround: drinksAround, windowVolume: windowVolume, windowByGroup: windowByGroup,
     dayStats: dayStats, computeStreak: computeStreak,
     nightGeometry: nightGeometry, awakeningGeometry: awakeningGeometry, validateNight: validateNight,

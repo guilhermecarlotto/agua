@@ -123,8 +123,20 @@
   .undo-row{ display:flex; justify-content:flex-end; margin-top:8px; }
   .linkbtn{ background:none; border:none; color:var(--text-dim); font-size:12px; text-decoration:underline; cursor:pointer; padding:10px 8px; min-height:38px; font-family:inherit; }
 
-  details.sess{ margin-top:12px; border-top:1px dashed var(--border); padding-top:10px; }
-  details.sess summary{ font-size:13px; color:var(--accent-2); cursor:pointer; font-weight:700; padding:6px 0; }
+  /* opções minimalistas dentro do cartão da água */
+  .opts-row{ display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .chip.mini{ min-height:36px; padding:6px 8px; font-size:12px; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+  .chip.mini::before{ content:""; width:13px; height:13px; border:1.5px solid var(--text-dim); border-radius:4px; display:inline-block; flex:none; }
+  .chip.mini.on::before{ background:var(--accent-2); border-color:var(--accent-2); box-shadow:inset 0 0 0 2px var(--bg-1); }
+  .opts-row .linkbtn{ padding:6px 4px; min-height:36px; white-space:nowrap; }
+  /* chimarrão por cuias */
+  .cuia-row{ display:grid; grid-template-columns:1fr 1.25fr; gap:10px; align-items:end; }
+  .cuia-btn{ min-height:68px; font-size:19px; }
+  .cuia-counter{ margin-top:12px; background:var(--bg-1); border:1px solid var(--border); border-radius:14px; padding:12px 14px; }
+  .cuia-big{ font-size:22px; font-weight:800; color:var(--chima); }
+  .cuia-big small{ font-size:13px; color:var(--text-dim); font-weight:600; }
+  .cuia-sub{ font-size:12px; color:var(--text-dim); margin-top:4px; line-height:1.4; }
+  .cuia-day{ font-size:12px; color:var(--text-dim); margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); display:flex; justify-content:space-between; align-items:center; gap:8px; }
   .field{ margin-bottom:12px; }
   .field > label{ display:block; font-size:12px; color:var(--text-dim); margin-bottom:6px; font-weight:600; }
   .two{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -393,7 +405,24 @@
         <input type="number" class="inp" id="manualInput" placeholder="Quantidade manual (ml)" min="1" inputmode="numeric">
         <button class="btn" id="manualAdd">Adicionar</button>
       </div>
-      <div class="undo-row"><button class="linkbtn" id="undoBtn">↩ desfazer último registro</button></div>
+      <div class="opts-row">
+        <button type="button" class="chip mini" id="wakeToggle" title="O próximo registro de água conta como água ao acordar">😴 ao acordar</button>
+        <button type="button" class="chip mini" id="vitToggle" title="Marca as vitaminas de hoje">💊 vitaminas</button>
+        <span class="grow"></span>
+        <button class="linkbtn" id="undoBtn">↩ desfazer</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧉 Chimarrão</h2>
+      <div class="cuia-row">
+        <div class="field" style="margin:0">
+          <label for="cuiaMl">Tamanho da cuia (ml)</label>
+          <input type="number" class="inp" id="cuiaMl" min="1" max="3000" inputmode="numeric" placeholder="ex.: 200">
+        </div>
+        <button type="button" class="btn-add chima cuia-btn" id="cuiaBtn">🧉 + cuia</button>
+      </div>
+      <div class="cuia-counter" id="cuiaCounter"></div>
     </div>
 
     <div class="card">
@@ -403,28 +432,6 @@
         <input type="number" class="inp" id="coffeeManual" placeholder="Outra quantidade (ml)" min="1" inputmode="numeric">
         <button class="btn" id="coffeeAdd">Adicionar</button>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>🧉 Chimarrão</h2>
-      <div class="btn-grid three" id="chimaBtns"></div>
-      <div class="manual-row">
-        <input type="number" class="inp" id="chimaManual" placeholder="Volume tomado (ml)" min="1" inputmode="numeric">
-        <button class="btn" id="chimaAdd">Adicionar</button>
-      </div>
-      <details class="sess" id="chimaSess">
-        <summary>Registrar como sessão (início – fim)</summary>
-        <div class="two" style="margin-top:8px">
-          <div class="field"><label>Início</label><input type="time" class="inp" id="sessStart"></div>
-          <div class="field"><label>Fim</label><input type="time" class="inp" id="sessEnd"></div>
-        </div>
-        <div class="two">
-          <div class="field"><label>Volume efetivamente tomado (ml)</label><input type="number" class="inp" id="sessMl" min="1" inputmode="numeric" placeholder="ex.: 800"></div>
-          <div class="field"><label>Dia</label><input type="date" class="inp" id="sessDate"></div>
-        </div>
-        <button class="btn primary block" id="sessAdd">Salvar sessão</button>
-        <div class="hint">Registre o que você realmente bebeu (800 ml de uma garrafa de 1 L = 800). O volume fica num único registro: não é espalhado entre início e fim, e nas análises por horário aparece como “incerto” quando a sessão cruza a janela.</div>
-      </details>
     </div>
 
     <div class="card">
@@ -445,22 +452,6 @@
     <div class="card">
       <h2>Hoje</h2>
       <div class="tiles" id="tiles"></div>
-    </div>
-
-    <div class="card">
-      <h2>Registrar agora</h2>
-      <div class="toggle-list">
-        <div class="toggle wake" id="wakeToggle">
-          <div class="emoji">😴</div>
-          <div class="label">Ingestão ao acordar<small>o próximo registro de água conta como “água ao acordar”</small></div>
-          <div class="switch"></div>
-        </div>
-        <div class="toggle vit" id="vitToggle">
-          <div class="emoji">💊</div>
-          <div class="label">Tomei as vitaminas hoje<small>marca o dia de hoje</small></div>
-          <div class="switch"></div>
-        </div>
-      </div>
     </div>
 
     <div class="card">
@@ -549,7 +540,7 @@
 (function(){
   "use strict";
   var C = window.GotaCore;
-  var APP_VERSION = "2.0.0";
+  var APP_VERSION = "2.1.0";
   var KEY_V2 = "gota_state_v2", KEY_V1 = "gota_agua_state_v1", KEY_UI = "gota_ui_v1", KEY_PRE = "gota_state_v2_antes_de_importar";
   var DB_NAME = "gotaDB", DB_STORE = "state";
   var state = null;
@@ -735,7 +726,6 @@
   function renderQuickButtons(){
     var s = state.settings;
     $("coffeeBtns").innerHTML = s.quickCoffee.map(function(v){ return '<div class="btn-add coffee" data-quick="coffee" data-ml="' + v + '">+' + v + 'ml</div>'; }).join("");
-    $("chimaBtns").innerHTML = s.quickChima.map(function(v){ return '<div class="btn-add chima" data-quick="chimarrao" data-ml="' + v + '">+' + (v >= 1000 && v % 1000 === 0 ? (v/1000) + "L" : v + "ml") + '</div>'; }).join("");
   }
 
   var glassFill = $("fillGroup");
@@ -761,9 +751,26 @@
     var st = C.computeStreak(state, t);
     if(st.record > (state.settings.recordStreak || 0)){ state.settings.recordStreak = st.record; save(); }
     $("streakNum").textContent = st.current; $("recordNum").textContent = st.record;
-    renderHistory(); drawChart(idx); refreshDetailFields(false);
+    renderCuia(); renderHistory(); drawChart(idx); refreshDetailFields(false);
   }
   function tile(cls, label, valueHtml){ return '<div class="tile ' + cls + '"><div class="v">' + valueHtml + '</div><div class="l">' + label + '</div></div>'; }
+
+  function renderCuia(){
+    var n = nowParts(), st = C.cuiaStats(state, n.date, n.time), a = st.active;
+    if(document.activeElement !== $("cuiaMl")) $("cuiaMl").value = state.settings.cuiaMl || "";
+    var h;
+    if(a){
+      var first = a.start || a.time, last = a.end || a.time;
+      h = '<div class="cuia-big">' + a.cuias + (a.cuias === 1 ? " cuia" : " cuias") + ' <small>· ' + a.ml.toLocaleString("pt-BR") + ' ml</small></div>' +
+        '<div class="cuia-sub">Sessão em andamento · início ' + first + (a.cuias > 1 ? ' · última cuia ' + last : '') + '</div>';
+    } else {
+      h = '<div class="cuia-big">0 cuias <small>· 0 ml</small></div>' +
+        '<div class="cuia-sub">Sem sessão em andamento. A 1ª cuia marca o início; a última, o fim da sessão.</div>';
+    }
+    h += '<div class="cuia-day"><span>Hoje: ' + st.dayCuias + (st.dayCuias === 1 ? " cuia" : " cuias") + ' · chimarrão total ' + st.dayChimaMl.toLocaleString("pt-BR") + ' ml</span>' +
+      (a ? '<button class="btn small" data-closecuia="' + esc(a.id) + '">Encerrar</button>' : '') + '</div>';
+    $("cuiaCounter").innerHTML = h;
+  }
 
   function renderHistory(){
     var key = ui.histDate || today();
@@ -780,7 +787,8 @@
     el.innerHTML = list.map(function(d){
       var T = C.TYPES[d.type];
       var when = d.start ? d.start + "–" + d.end : (d.time || "sem horário");
-      var sub = d.start ? "sessão" : (d.wake ? "ao acordar" : (d.source === "v1" && !d.time ? "lançamento antigo" : ""));
+      var sub = d.cuias ? (d.cuias + (d.cuias === 1 ? " cuia" : " cuias") + (d.start ? " · sessão" : "")) :
+        (d.start ? "sessão" : (d.wake ? "ao acordar" : (d.source === "v1" && !d.time ? "lançamento antigo" : "")));
       return '<div class="entry' + (d.wake ? " wake" : "") + '" data-edit="' + esc(d.id) + '">' +
         '<span class="ico">' + (d.wake ? "🌅" : T.emoji) + '</span>' +
         '<span class="main"><span class="amt">' + d.ml.toLocaleString("pt-BR") + ' ml</span> <span style="color:var(--text-dim)">' + T.label + '</span>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</span>' +
@@ -849,8 +857,6 @@
     if(!dt.dirtyDate) $("dtDate").value = n.date;
     $("dtDate").max = n.date;
     if(!dt.dirtyTime && !dt.clearedTime) $("dtTime").value = n.time;
-    if(!$("sessDate").value) $("sessDate").value = n.date;
-    $("sessDate").max = n.date;
   }
   function addDetailed(){
     var ml = parseMl($("dtMl").value);
@@ -1352,8 +1358,7 @@
     var h = '<h3>Ajustes e backup</h3>';
     h += '<div class="toggle' + (ui.oled ? ' on' : '') + '" id="setOled" style="margin-bottom:14px"><div class="emoji">🌑</div><div class="label">Modo noturno (tela mínima)<small>fundo preto puro e cores apagadas em vermelho, para registrar de madrugada com o mínimo de luz</small></div><div class="switch"></div></div>';
     h += '<div class="field"><label>Botões rápidos de café (ml, até 4, separados por vírgula)</label><input class="inp" id="setCoffee" value="' + s.quickCoffee.join(", ") + '" inputmode="numeric"></div>';
-    h += '<div class="field"><label>Botões rápidos de chimarrão (ml)</label><input class="inp" id="setChima" value="' + s.quickChima.join(", ") + '" inputmode="numeric"></div>';
-    h += '<button class="btn block" id="setSave">Salvar botões</button>';
+    h += '<button class="btn block" id="setSave">Salvar botões de café</button>';
     h += '<h3>Backup</h3><div class="row wrap-r"><button class="btn grow" id="setExport">⬇ Exportar</button><button class="btn grow" id="setImport">⬆ Importar</button></div>';
     h += '<div class="hint">Exporte um backup antes de atualizar o app ou trocar de aparelho. Importar aceita arquivos do Gota antigo e do novo.</div>';
     h += '<h3>Dados neste aparelho</h3><div class="infobox" id="setInfo">' + state.drinks.length + ' lançamentos de bebida · ' + state.nights.length + ' noites · ' + state.bathroom.length + ' idas ao banheiro' +
@@ -1369,8 +1374,7 @@
     $("setSave").addEventListener("click", function(){
       function parseList(v){ return String(v).split(/[,;\s]+/).filter(Boolean).map(function(x){ return Math.round(+x); }); }
       state.settings.quickCoffee = C.cleanQuick(parseList($("setCoffee").value), C.defaultSettings().quickCoffee);
-      state.settings.quickChima = C.cleanQuick(parseList($("setChima").value), C.defaultSettings().quickChima);
-      save(); renderQuickButtons(); toast("Botões atualizados");
+      save(); renderQuickButtons(); toast("Botões de café atualizados");
     });
     $("setMirror").addEventListener("click", function(){
       idbGet("state_v2").then(function(m){
@@ -1486,18 +1490,27 @@
   $("manualAdd").addEventListener("click", function(){ var v = parseMl($("manualInput").value); if(v){ quickAdd("water", v, $("manualAdd")); $("manualInput").value = ""; } else toast("Informe a quantidade em ml"); });
   $("manualInput").addEventListener("keydown", function(e){ if(e.key === "Enter") $("manualAdd").click(); });
   $("coffeeAdd").addEventListener("click", function(){ var v = parseMl($("coffeeManual").value); if(v){ quickAdd("coffee", v, $("coffeeAdd")); $("coffeeManual").value = ""; } else toast("Informe a quantidade em ml"); });
-  $("chimaAdd").addEventListener("click", function(){ var v = parseMl($("chimaManual").value); if(v){ quickAdd("chimarrao", v, $("chimaAdd")); $("chimaManual").value = ""; } else toast("Informe a quantidade em ml"); });
-  $("sessAdd").addEventListener("click", function(){
-    var ml = parseMl($("sessMl").value), n = nowParts();
-    if(!ml) return toast("Informe o volume tomado em ml");
-    var out = null, ok = mutate(function(){
-      var r = C.addDrink(state, { type:"chimarrao", ml:ml, date:$("sessDate").value || n.date, start:$("sessStart").value, end:$("sessEnd").value }, { today:n.date });
-      if(!r.ok){ toast(r.error); return false; }
-      out = r.item;
-    }, null);
-    if(!ok) return;
-    $("sessMl").value = ""; $("sessStart").value = ""; $("sessEnd").value = "";
-    toast("🧉 Sessão " + out.start + "–" + out.end + " · " + ml + " ml", "Desfazer", function(){ mutate(function(){ C.deleteById(state.drinks, out.id); }, "Registro desfeito"); });
+  // chimarrão por cuias
+  $("cuiaMl").addEventListener("change", function(){
+    var v = parseMl($("cuiaMl").value);
+    if(v && v <= 3000){ state.settings.cuiaMl = v; save(); } else { $("cuiaMl").value = state.settings.cuiaMl || ""; if(v) toast("Tamanho da cuia até 3000 ml"); }
+  });
+  $("cuiaBtn").addEventListener("click", function(){
+    var ml = parseMl($("cuiaMl").value);
+    if(!ml){ toast("Informe o tamanho da cuia (ml)"); $("cuiaMl").focus(); return; }
+    var n = nowParts(), snap = JSON.stringify(state);
+    state.settings.cuiaMl = ml;
+    var r = C.addCuia(state, { cuiaMl:ml, date:n.date, time:n.time }, { today:n.date });
+    if(!r.ok){ state = C.ensureShape(JSON.parse(snap)); toast(r.error); return; }
+    save(); renderAll(); flash($("cuiaBtn"));
+    var d = r.item;
+    toast("🧉 " + (r.created ? "início da sessão " + n.time : d.cuias + "ª cuia") + " · " + d.ml.toLocaleString("pt-BR") + " ml", "Desfazer", function(){
+      state = C.ensureShape(JSON.parse(snap)); save(); renderAll(); toast("Desfeito");
+    });
+  });
+  $("cuiaCounter").addEventListener("click", function(e){
+    if(!e.target.closest("[data-closecuia]")) return;
+    mutate(function(){ C.closeCuiaSession(state, e.target.closest("[data-closecuia]").dataset.closecuia); }, "Sessão encerrada", true);
   });
   $("undoBtn").addEventListener("click", function(){
     var t = today(), list = state.drinks.filter(function(d){ return d.date === t; });
@@ -1512,7 +1525,8 @@
   $("wakeToggle").addEventListener("click", function(){ wakeModeOn = !wakeModeOn; renderAgua(); });
   $("vitToggle").addEventListener("click", function(){
     var t = today();
-    mutate(function(){ if(state.vitamins[t]) delete state.vitamins[t]; else state.vitamins[t] = true; }, state.vitamins[t] ? "💊 vitaminas registradas" : null);
+    var willBeOn = !state.vitamins[t];
+    mutate(function(){ if(willBeOn) state.vitamins[t] = true; else delete state.vitamins[t]; }, willBeOn ? "💊 vitaminas registradas" : "Vitaminas desmarcadas");
   });
   // registro detalhado
   $("dtDate").addEventListener("input", function(){

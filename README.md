@@ -8,7 +8,7 @@ Diário pessoal (PWA, HTML/CSS/JS puro, sem build, sem backend, sem dependência
 
 | Aba | O que tem |
 |---|---|
-| 💧 **Água** | Botões de 1 toque (+250 ml, +500 ml, +1 L, +1,7 L), café e chimarrão com botões rápidos configuráveis, outras bebidas / registro detalhado (data e hora editáveis), resumo do dia (água, total de líquidos, café, chimarrão, outras, última ingestão, período da noite), meta de água, sequência, gráfico de 14 dias, histórico com navegação por dia e edição. |
+| 💧 **Água** | Botões de 1 toque (+250 ml, +500 ml, +1 L, +1,7 L) com as opções discretas **😴 ao acordar** e **💊 vitaminas** logo abaixo; **chimarrão por cuias**; café com botões rápidos configuráveis; outras bebidas / registro detalhado (data e hora editáveis), resumo do dia (água, total de líquidos, café, chimarrão, outras, última ingestão, período da noite), meta de água, sequência, gráfico de 14 dias, histórico com navegação por dia e edição. |
 | 🌙 **Sono** | Botão **🚻 Fui ao banheiro agora**, resumo da última noite, formulário da noite (dormi/acordei, despertares individuais ou só totais, nota 0–10, avaliação, observações), idas ao banheiro da noite com associação aos despertares, lista de noites. |
 | 📊 **Análise** | Período (7/14/30 dias, tudo), última noite, 8 comparações em gráficos de dispersão (1 ponto = 1 noite, toque para abrir a noite), café e chimarrão por dia, padrões observados (com n e diferença entre médias), tabela comparativa com detalhe por noite. |
 
@@ -29,6 +29,7 @@ O botão 🚻 também fica **no cabeçalho de todas as telas**. Entre 22h e 6h o
 - **Ida ao banheiro** pertence à noite pelo horário: antes das 12h = madrugada da noite anterior. Se a noite tem registro de sono, só contam as idas **entre dormir e acordar**.
 - **Sem dupla contagem:** o despertar marcado com 🚻 e a ida registrada pelo botão no mesmo horário (±10 min) são tratados como o mesmo evento (o app *sugere* o vínculo e você confirma/corrige). Despertar marcado 🚻 sem registro de botão conta como uma ida. Totais agregados do relógio só valem se não houver despertares individuais.
 - **Janelas antes de dormir** (2, 3 e 4 h), separadas em água / café / chimarrão / outras / total, mais última ingestão e intervalo até dormir.
+- **Chimarrão por cuias:** informe uma vez o **tamanho da cuia** (ml; fica gravado) e toque em **🧉 + cuia** a cada cuia tomada. A 1ª cuia cria a sessão e o horário dela é o **início**; cada nova cuia soma o volume no **mesmo registro** e atualiza o **fim** para o horário da última. O contador mostra cuias e ml da sessão em andamento e o total do dia. A sessão termina pelo botão **Encerrar** ou sozinha quando passam **3 h sem nova cuia** (a próxima cuia abre outra sessão). "Desfazer" reverte o último toque. Para lançar um volume avulso, use "Outras bebidas / registro detalhado" (tipo Chimarrão).
 - **Chimarrão em sessão** (início–fim, ex.: 800 ml das 16h às 18h) é **um único registro**; editar não duplica. O volume **não é distribuído** entre início e fim: em janelas que a sessão cruza só em parte, o app mostra "0 (até 800, incerto)". Nas análises, pontos incertos aparecem vazados e noites ambíguas ficam fora das comparações em grupo.
 - **"Sem dados" ≠ zero.** Noite sem bebidas com horário no dia, sem informação de despertares ou sem nota mostra "Sem dados" e fica fora dos gráficos/médias daquele indicador. "Não acordei" é um dado explícito (zero).
 - **Padrões** só aparecem com ≥ 3 noites em cada grupo e ≥ 8 no total, sempre com n e diferença das médias. Não há teste estatístico: poucas noites variam por acaso.
@@ -53,11 +54,11 @@ O botão 🚻 também fica **no cabeçalho de todas as telas**. Entre 22h e 6h o
 agua/
 ├── index.html        app (interface, armazenamento, gráficos)
 ├── gota-core.js      NOVO — lógica pura: datas, migração, validação, cálculos, análises (testável sem navegador)
-├── sw.js             service worker (network-first; cache gota-v3)
+├── sw.js             service worker (network-first; cache gota-v4)
 ├── manifest.json     manifesto PWA
 ├── icon-192.png / icon-512.png
 ├── tests/
-│   ├── core.test.js  57 testes automatizados do núcleo
+│   ├── core.test.js  64 testes automatizados do núcleo
 │   └── run.html      roda os testes no navegador
 └── README.md
 ```
