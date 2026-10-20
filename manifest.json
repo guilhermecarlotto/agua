@@ -1,7 +1,8 @@
 {
-  "name": "Gota – Controle de Água",
+  "name": "Gota – Água, Chimarrão e Sono",
   "short_name": "Gota",
-  "description": "Acompanhe seu consumo diário de água, vitaminas e metas.",
+  "description": "Diário pessoal de hidratação, café, chimarrão e qualidade do sono.",
+  "lang": "pt-BR",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
